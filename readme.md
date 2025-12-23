@@ -161,11 +161,13 @@ Implementation detail: The `maxTime` parameter of all planning contexts is ignor
 
 The visualization is interactive. These are the five keys that are currently bound to some action:
 
-- 'f': forward one iteration
-- 'b': backward one iteration
-- 'F': forward 10% of largest computed iteration
-- 'B': backward 10% of largest computed iteration
+- 'f': forward one iteration (can be held down for continuous advancement)
+- 'b': backward one iteration (can be held down for continuous backward movement)
+- 'F': forward 10% of largest computed iteration (can be held down)
+- 'B': backward 10% of largest computed iteration (can be held down)
 - ' ': Toggle tracking
+
+**Note**: You can now hold down the 'f', 'b', 'F', or 'B' keys to continuously navigate through iterations, making it easier to browse through the planning process.
 
 When tracking is on, the most recently computed iteration is visualized.
 
