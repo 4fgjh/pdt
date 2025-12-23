@@ -176,18 +176,10 @@ void InteractiveVisualizer::run() {
   pangolin::Var<bool> optionPlay(optionsName + ".Play", false, false);
   pangolin::Var<bool> optionExport(optionsName + ".Export", false, false);
 
-  // Register some keypresses.
-  pangolin::RegisterKeyPressCallback('f', [this]() { incrementIteration(1u); });
-  pangolin::RegisterKeyPressCallback('b', [this]() { decrementIteration(1u); });
-  pangolin::RegisterKeyPressCallback('F', [this]() {
-    incrementIteration(
-        static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_))));
-  });
-  pangolin::RegisterKeyPressCallback('B', [this]() {
-    decrementIteration(
-        static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_))));
-  });
+  // Register some keypresses for single-press actions.
   pangolin::RegisterKeyPressCallback(' ', [&optionTrack]() { optionTrack = !optionTrack; });
+  
+  // Note: We'll handle f/b/F/B keys in the render loop for better key repeat support
 
   // This sets the color used when clearing the screen.
   glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -197,6 +189,10 @@ void InteractiveVisualizer::run() {
 
   // Give the data thread a head start.
   std::this_thread::sleep_for(std::chrono::milliseconds(10u));
+
+  // Variables for key repeat functionality
+  auto lastKeyRepeatTime = std::chrono::steady_clock::now();
+  constexpr std::chrono::milliseconds keyRepeatDelay(100);  // Delay between repeats when holding key
 
   while (!pangolin::ShouldQuit()) {
     // Compute the time spent at current query by finding the iteration at which we started
@@ -302,6 +298,38 @@ void InteractiveVisualizer::run() {
                                  timeAtCurrentQuery, getSolutionCost(displayIteration_).value());
         }
         incrementIteration();
+      }
+    }
+
+    // Check for held keys to enable continuous iteration when keys are held down
+    // We check keyboard input in each frame to support holding down keys
+    auto currentTime = std::chrono::steady_clock::now();
+    if (currentTime - lastKeyRepeatTime >= keyRepeatDelay && !playToIteration_ && !exporting_ && !optionTrack) {
+      // Check for navigation keys being pressed
+      // This allows continuous iteration when keys are held down
+      // Use else-if to handle only one key per frame
+      
+      // Forward one iteration (lowercase f)
+      if (pangolin::HadInput('f')) {
+        incrementIteration(1u);
+        lastKeyRepeatTime = currentTime;
+      }
+      // Backward one iteration (lowercase b)
+      else if (pangolin::HadInput('b')) {
+        decrementIteration(1u);
+        lastKeyRepeatTime = currentTime;
+      }
+      // Forward 10% (uppercase F)
+      else if (pangolin::HadInput('F')) {
+        auto increment = static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_)));
+        incrementIteration(std::max(1u, increment));
+        lastKeyRepeatTime = currentTime;
+      }
+      // Backward 10% (uppercase B)
+      else if (pangolin::HadInput('B')) {
+        auto decrement = static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_)));
+        decrementIteration(std::max(1u, decrement));
+        lastKeyRepeatTime = currentTime;
       }
     }
 
