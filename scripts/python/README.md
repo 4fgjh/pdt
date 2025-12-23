@@ -10,8 +10,11 @@ Searches for files in the PDT repository that contain references to EIT* (Effort
 
 **Usage:**
 ```bash
-# Find all files with EIT references
+# Find all files with EIT references (just file names)
 python find_eit_files.py
+
+# Show summary with file count
+python find_eit_files.py -s
 
 # Show detailed matches with line numbers
 python find_eit_files.py -v
@@ -32,8 +35,17 @@ python find_eit_files.py -e ".h,.cpp,.cc"
 - `-e EXTS, --extensions EXTS`: Comma-separated file extensions to search (default: .h,.cpp,.hpp)
 - `-v, --verbose`: Show detailed information about matches including line numbers
 - `-c, --count`: Show count of matches per file
+- `-s, --summary`: Show summary information (file count, match count)
 
-**Example output:**
+**Example output (default):**
+```
+src/common/include/pdt/common/planner_type.h
+src/factories/src/planner_factory.cpp
+src/utilities/src/get_best_cost.cpp
+...
+```
+
+**Example output (with -s flag):**
 ```
 Searching for EIT-related files in: /path/to/pdt
 File extensions: .h, .cpp, .hpp

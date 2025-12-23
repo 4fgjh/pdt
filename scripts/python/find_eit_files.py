@@ -15,6 +15,7 @@ Options:
     -e, --extensions EXTS   File extensions to search (default: .h,.cpp,.hpp)
     -v, --verbose           Show detailed information about matches
     -c, --count             Show count of matches per file
+    -s, --summary           Show summary information (file count, match count)
 """
 
 import argparse
@@ -76,8 +77,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Find all files with EIT references
+  # Find all files with EIT references (just file names)
   python find_eit_files.py
+  
+  # Show summary with file count
+  python find_eit_files.py -s
   
   # Show detailed matches with line numbers
   python find_eit_files.py -v
@@ -119,6 +123,12 @@ Examples:
         help='Show count of matches per file'
     )
     
+    parser.add_argument(
+        '-s', '--summary',
+        action='store_true',
+        help='Show summary information (file count, match count)'
+    )
+    
     args = parser.parse_args()
     
     # Determine base path
@@ -147,9 +157,10 @@ Examples:
     ]
     
     # Search for files
-    print(f"Searching for EIT-related files in: {base_path}")
-    print(f"File extensions: {', '.join(extensions)}")
-    print()
+    if args.summary or args.verbose or args.count:
+        print(f"Searching for EIT-related files in: {base_path}")
+        print(f"File extensions: {', '.join(extensions)}")
+        print()
     
     found_files = []
     total_matches = 0
@@ -172,11 +183,13 @@ Examples:
     
     # Display results
     if not found_files:
-        print("No files containing EIT references were found.")
+        if args.summary:
+            print("No files containing EIT references were found.")
         return
     
-    print(f"Found {len(found_files)} file(s) with EIT references:")
-    print()
+    if args.summary:
+        print(f"Found {len(found_files)} file(s) with EIT references:")
+        print()
     
     for rel_path, count, details in sorted(found_files):
         if args.count:
@@ -191,7 +204,8 @@ Examples:
         if args.verbose or args.count:
             print()
     
-    print(f"Total: {len(found_files)} file(s), {total_matches} match(es)")
+    if args.summary:
+        print(f"Total: {len(found_files)} file(s), {total_matches} match(es)")
 
 
 if __name__ == '__main__':
