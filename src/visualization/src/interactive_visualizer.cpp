@@ -307,32 +307,28 @@ void InteractiveVisualizer::run() {
     if (currentTime - lastKeyRepeatTime >= keyRepeatDelay && !playToIteration_ && !exporting_ && !optionTrack) {
       // Check for navigation keys being pressed
       // This allows continuous iteration when keys are held down
-      bool keyWasHandled = false;
+      // Use else-if to handle only one key per frame
       
       // Forward one iteration (lowercase f)
       if (pangolin::HadInput('f')) {
         incrementIteration(1u);
-        keyWasHandled = true;
+        lastKeyRepeatTime = currentTime;
       }
       // Backward one iteration (lowercase b)
-      if (pangolin::HadInput('b')) {
+      else if (pangolin::HadInput('b')) {
         decrementIteration(1u);
-        keyWasHandled = true;
+        lastKeyRepeatTime = currentTime;
       }
       // Forward 10% (uppercase F)
-      if (pangolin::HadInput('F')) {
-        incrementIteration(
-            static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_))));
-        keyWasHandled = true;
+      else if (pangolin::HadInput('F')) {
+        auto increment = static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_)));
+        incrementIteration(std::max(1u, increment));
+        lastKeyRepeatTime = currentTime;
       }
       // Backward 10% (uppercase B)
-      if (pangolin::HadInput('B')) {
-        decrementIteration(
-            static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_))));
-        keyWasHandled = true;
-      }
-      
-      if (keyWasHandled) {
+      else if (pangolin::HadInput('B')) {
+        auto decrement = static_cast<std::size_t>(std::ceil(0.1 * static_cast<double>(largestIteration_)));
+        decrementIteration(std::max(1u, decrement));
         lastKeyRepeatTime = currentTime;
       }
     }
