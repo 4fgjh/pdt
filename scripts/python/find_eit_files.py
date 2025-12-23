@@ -134,6 +134,9 @@ Examples:
     # Determine base path
     if args.path:
         base_path = Path(args.path).resolve()
+        if not base_path.exists():
+            print(f"Error: Path {base_path} does not exist.", file=sys.stderr)
+            sys.exit(1)
     else:
         base_path = find_pdt_root()
         if base_path is None:
@@ -141,18 +144,14 @@ Examples:
             print("Please specify the path with -p option.", file=sys.stderr)
             sys.exit(1)
     
-    if not base_path.exists():
-        print(f"Error: Path {base_path} does not exist.", file=sys.stderr)
-        sys.exit(1)
-    
     # Parse extensions
     extensions = tuple(ext.strip() for ext in args.extensions.split(','))
     
     # Define patterns to search for
     patterns = [
-        re.compile(r'\bEIT[Ss]tar\b'),       # EITstar or EITStar
-        re.compile(r'\bEIRM[Ss]tar\b'),      # EIRMstar or EIRMStar
-        re.compile(r'\bEIT\b'),              # EIT alone
+        re.compile(r'\bEIT[sS]tar\b'),       # EITstar or EITSTAR
+        re.compile(r'\bEIRM[sS]tar\b'),      # EIRMstar or EIRMSTAR
+        re.compile(r'\bEIT\b'),              # EIT alone (for preprocessor flags, etc.)
         re.compile(r'PDT_EXTRA_EITSTAR_PR'), # Preprocessor flag
     ]
     
